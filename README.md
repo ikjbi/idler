@@ -13,15 +13,15 @@ A lightweight auto-clicker for Windows 11, macOS, and Linux. Set an interval, pi
 
 ## How to use
 
-1. Set **Click every** to your desired interval in seconds.
+1. Set **Click every** to your desired interval and choose the unit — **seconds**, **minutes**, or **hours**.
 2. Choose a mode:
    - **Infinite** — clicks until you press Stop.
-   - **Stop after duration** — clicks for the specified number of seconds, then stops automatically.
-   - **Stop after N clicks** — fires exactly N clicks, then stops automatically.
+   - **Stop after** (duration) — enter a value and unit (seconds/minutes/hours); stops automatically when the time is up.
+   - **Stop after** (N clicks) — fires exactly N clicks, then stops automatically.
 3. Press **Start**. The status line updates live with click count and remaining time or clicks.
 4. Press **Stop** at any time to abort.
 
-The interval and mode controls are locked while running and re-enabled after stopping.
+The interval, unit selectors, and mode controls are locked while running and re-enabled after stopping.
 
 ---
 
