@@ -137,6 +137,20 @@ Produces `build/mac/idler.app` and `build/idler.dmg`. Qt frameworks are embedded
 
 ---
 
+## Learn C++ with this project
+
+This repository doubles as a beginner C++ course. **[Learn C++ by Building Idler](docs/Learn-Cpp-with-Idler.pdf)** is a 31-page book that teaches C++ from zero — no prior programming experience assumed — using Idler's real source as the running example.
+
+Across 14 chapters it covers the language basics, headers and the compilation model, CMake, classes, pointers and memory ownership, building a GUI with Qt, signals and slots, timers and state, cross-platform OS APIs, and packaging — ending with a guided next project (a Pomodoro focus timer).
+
+The PDF is generated from [`docs/generate_book.py`](docs/generate_book.py); rebuild it with:
+
+```bash
+python3 docs/generate_book.py   # requires: pip install reportlab
+```
+
+---
+
 ## License
 
 MIT
