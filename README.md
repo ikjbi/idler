@@ -1,15 +1,17 @@
 # idler
 
-A lightweight auto-clicker for Windows 11 and macOS. Set an interval, pick a stop condition, and let it click.
+A lightweight auto-clicker for Windows 11, macOS, and Linux. Set an interval, pick a stop condition, and let it click.
 
 ## Features
 
 - Click every N seconds (supports fractions, e.g. 0.25 s)
 - Three modes: infinite, stop after a duration, or stop after N clicks
 - Live status showing click count and time/clicks remaining
-- No installer required — portable on both platforms
+- No installer required — portable on Windows and macOS
 
-## Usage
+---
+
+## How to use
 
 1. Set **Click every** to your desired interval in seconds.
 2. Choose a mode:
@@ -21,7 +23,82 @@ A lightweight auto-clicker for Windows 11 and macOS. Set an interval, pick a sto
 
 The interval and mode controls are locked while running and re-enabled after stopping.
 
-## Building
+---
+
+## Installing
+
+### Windows
+
+1. Download the latest `idler-windows.zip` from [Releases](https://github.com/ikjbi/idler/releases).
+2. Extract the zip anywhere (e.g. `C:\Tools\idler\`).
+3. Run `idler.exe` — no install needed, all required DLLs are included.
+
+> **Antivirus:** Some antivirus tools flag auto-clickers due to how `SendInput` is used. If Windows Defender blocks the exe, add an exclusion for the folder.
+
+---
+
+### macOS
+
+1. Download the latest `idler.dmg` from [Releases](https://github.com/ikjbi/idler/releases).
+2. Open the `.dmg` and drag **idler.app** to your **Applications** folder.
+3. Launch idler from Applications or Spotlight.
+
+**First launch — Gatekeeper warning:**  
+Because the app is unsigned, macOS will say it "can't be opened because the developer is unverified." To bypass it:
+- Right-click (or Control-click) `idler.app` → **Open** → **Open** again in the dialog.
+
+You only need to do this once.
+
+**Accessibility permission (required):**  
+idler uses `CGEventPost` to synthesize clicks. macOS blocks this by default. On first run you will be prompted, or go manually to:
+
+**System Settings → Privacy & Security → Accessibility → enable idler**
+
+Without this, the app opens normally but clicks are silently blocked.
+
+---
+
+### Linux
+
+idler uses the X11 XTest extension to send clicks. Wayland is supported via XWayland (which most desktop environments enable by default).
+
+#### Install dependencies
+
+**Debian / Ubuntu / Linux Mint:**
+```bash
+sudo apt install cmake qt6-base-dev libxtst-dev libx11-dev
+```
+
+**Fedora / RHEL:**
+```bash
+sudo dnf install cmake qt6-qtbase-devel libXtst-devel libX11-devel
+```
+
+**Arch Linux:**
+```bash
+sudo pacman -S cmake qt6-base libxtst
+```
+
+#### Build and install
+
+```bash
+git clone https://github.com/ikjbi/idler.git
+cd idler
+cmake -B build -DCMAKE_BUILD_TYPE=Release
+cmake --build build
+sudo cmake --install build   # installs to /usr/local/bin/idler
+```
+
+Or run it directly without installing:
+```bash
+./build/idler
+```
+
+> **Wayland note:** If clicks don't register, your compositor may have XWayland disabled. Set `QT_QPA_PLATFORM=xcb` before launching: `QT_QPA_PLATFORM=xcb ./build/idler`
+
+---
+
+## Building from source (Windows & macOS)
 
 ### Requirements
 
@@ -38,15 +115,13 @@ brew install qt cmake
 
 ### Windows — portable folder
 
-Run the included batch script:
-
 ```bat
 build_portable_windows.bat
 ```
 
-Output is in `build\portable\`. Copy that folder to any Windows 11 machine and run `idler.exe` — no install needed. Qt DLLs are bundled automatically via `windeployqt`.
+Output is in `build\portable\`. Copy that folder to any Windows 11 machine and run `idler.exe`.
 
-**Single .exe (no DLLs):** requires a statically compiled Qt build, then:
+**Single .exe (no DLLs):** requires a statically compiled Qt, then:
 
 ```bat
 cmake -B build\static -DCMAKE_BUILD_TYPE=Release -DPORTABLE=ON -DCMAKE_PREFIX_PATH=C:\Qt\static
@@ -59,36 +134,9 @@ cmake --build build\static --config Release
 ./build_portable_mac.sh
 ```
 
-Produces:
-- `build/mac/idler.app` — drag to `/Applications` or double-click to run
-- `build/idler.dmg` — disk image ready to share
+Produces `build/mac/idler.app` and `build/idler.dmg`. Qt frameworks are embedded so no Qt installation is needed on the target machine.
 
-Qt frameworks are embedded in the bundle via `macdeployqt`, so no Qt installation is needed on the target machine.
-
-### Manual CMake build (either platform)
-
-```bash
-cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=/path/to/Qt6
-cmake --build build --config Release
-```
-
-## Platform notes
-
-### macOS — Accessibility permission
-
-`CGEventPost` (the API used to synthesize clicks) requires Accessibility access. On first launch, go to:
-
-**System Settings → Privacy & Security → Accessibility → enable idler**
-
-Without this, the app opens normally but clicks are silently blocked by the OS.
-
-### macOS — Gatekeeper
-
-If you share the `.dmg`, recipients will see a warning because the app is unsigned. They can bypass it by right-clicking the app and choosing **Open** the first time. Removing the warning permanently requires an Apple Developer account for code signing and notarization.
-
-### Windows — antivirus
-
-Some antivirus tools flag auto-clickers due to how `SendInput` is used. If Windows Defender blocks the exe, add an exclusion for the `build\portable\` folder.
+---
 
 ## License
 
