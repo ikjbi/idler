@@ -29,9 +29,7 @@ The interval, unit selectors, and mode controls are locked while running and re-
 
 ### Windows
 
-1. Download the latest `idler-windows.zip` from [Releases](https://github.com/ikjbi/idler/releases).
-2. Extract the zip anywhere (e.g. `C:\Tools\idler\`).
-3. Run `idler.exe` — no install needed, all required DLLs are included.
+Build from source using the steps in the [Building from source](#building-from-source-windows--macos) section below. The build script produces a portable folder — copy it anywhere and run `idler.exe`, no install needed.
 
 > **Antivirus:** Some antivirus tools flag auto-clickers due to how `SendInput` is used. If Windows Defender blocks the exe, add an exclusion for the folder.
 
@@ -39,9 +37,10 @@ The interval, unit selectors, and mode controls are locked while running and re-
 
 ### macOS
 
-1. Download the latest `idler.dmg` from [Releases](https://github.com/ikjbi/idler/releases).
-2. Open the `.dmg` and drag **idler.app** to your **Applications** folder.
-3. Launch idler from Applications or Spotlight.
+Build from source using the steps in the [Building from source](#building-from-source-windows--macos) section below. The build script produces both an `idler.app` bundle and a `.dmg`.
+
+1. Open `build/idler.dmg` and drag **idler.app** to your **Applications** folder.
+2. Launch idler from Applications or Spotlight.
 
 **First launch — Gatekeeper warning:**  
 Because the app is unsigned, macOS will say it "can't be opened because the developer is unverified." To bypass it:
