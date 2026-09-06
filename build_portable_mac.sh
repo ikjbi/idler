@@ -9,6 +9,7 @@ set -euo pipefail
 
 BUILD_DIR="build/mac"
 APP_PATH="$BUILD_DIR/idler.app"
+DMG_DST="build/idler.dmg"
 
 # Locate Qt via Homebrew if not already in PATH
 if ! command -v macdeployqt &>/dev/null; then
@@ -24,34 +25,33 @@ fi
 
 QT_LIB_PATH="${CMAKE_PREFIX_PATH:-$(brew --prefix qt)}/lib"
 
-echo "[1/4] Configuring..."
+echo "[1/5] Configuring..."
 cmake -B "$BUILD_DIR" \
     -DCMAKE_BUILD_TYPE=Release \
     ${CMAKE_PREFIX_PATH:+-DCMAKE_PREFIX_PATH="$CMAKE_PREFIX_PATH"}
 
-echo "[2/4] Building..."
+echo "[2/5] Building..."
 cmake --build "$BUILD_DIR" --config Release
 
-echo "[3/4] Bundling Qt frameworks..."
-# Ensure all files are writable before clearing xattrs / codesigning
+echo "[3/5] Bundling Qt frameworks..."
+# Run macdeployqt without -dmg; codesign errors here are expected and handled below.
+macdeployqt "$APP_PATH" -libpath="$QT_LIB_PATH" -no-strip || true
+
+echo "[4/5] Signing..."
+# Clear all extended attributes from the whole bundle (including newly-copied frameworks),
+# then ad-hoc sign everything. Must happen AFTER macdeployqt so newly-copied files are covered.
 chmod -R u+w "$APP_PATH"
 xattr -cr "$APP_PATH"
-
-macdeployqt "$APP_PATH" \
-    -libpath="$QT_LIB_PATH" \
-    -no-strip \
-    -dmg
-
-echo "[4/4] Ad-hoc signing..."
-# Re-sign the whole bundle after macdeployqt (required for Gatekeeper on Apple Silicon)
 codesign --force --deep --sign - "$APP_PATH"
 
-# Move .dmg to a predictable location
-DMG_SRC="$BUILD_DIR/idler.dmg"
-DMG_DST="build/idler.dmg"
-if [[ -f "$DMG_SRC" ]]; then
-    mv "$DMG_SRC" "$DMG_DST"
-fi
+echo "[5/5] Creating DMG..."
+rm -f "$DMG_DST"
+hdiutil create \
+    -volname "idler" \
+    -srcfolder "$APP_PATH" \
+    -ov \
+    -format UDZO \
+    "$DMG_DST"
 
 echo ""
 echo "Done!"

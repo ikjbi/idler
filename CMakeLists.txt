@@ -4,6 +4,7 @@ project(idler VERSION 1.0 LANGUAGES CXX OBJCXX)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_AUTOMOC ON)
+set(CMAKE_AUTORCC ON)
 
 # Pass -DPORTABLE=ON to embed Qt statically (requires a static Qt build).
 # Default (OFF) uses dynamic Qt + windeployqt for a portable folder.
@@ -14,10 +15,11 @@ find_package(Qt6 REQUIRED COMPONENTS Widgets)
 set(SOURCES
     main.cpp
     MainWindow.cpp
+    resources.qrc
 )
 
 if(WIN32)
-    list(APPEND SOURCES clicker_windows.cpp)
+    list(APPEND SOURCES clicker_windows.cpp assets/icon.rc)
 elseif(APPLE)
     list(APPEND SOURCES clicker_mac.mm)
     enable_language(OBJCXX)
@@ -30,7 +32,6 @@ qt_add_executable(idler WIN32 MACOSX_BUNDLE ${SOURCES})
 target_link_libraries(idler PRIVATE Qt6::Widgets)
 
 if(WIN32 AND PORTABLE)
-    # Static build: also link the Windows runtime statically so there are no CRT DLL deps.
     set_property(TARGET idler PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 endif()
 
@@ -41,9 +42,17 @@ if(UNIX AND NOT APPLE)
     endif()
     target_include_directories(idler PRIVATE ${X11_INCLUDE_DIR})
     target_link_libraries(idler PRIVATE ${X11_LIBRARIES} ${X11_Xtst_LIB})
+
+    # Install desktop icon at standard sizes
+    foreach(SIZE 16 32 48 64 128 256 512)
+        install(FILES "assets/icons/icon_${SIZE}.png"
+            DESTINATION "share/icons/hicolor/${SIZE}x${SIZE}/apps"
+            RENAME "idler.png"
+        )
+    endforeach()
 endif()
 
-# windeployqt install rule (used by build_portable_windows.bat when PORTABLE=OFF)
+# windeployqt — bundles Qt DLLs next to the exe on Windows
 if(WIN32)
     find_program(WINDEPLOYQT windeployqt HINTS ${Qt6_DIR}/../../../bin)
     if(WINDEPLOYQT)
@@ -59,6 +68,10 @@ if(WIN32)
 endif()
 
 if(APPLE)
+    set(ICON_FILE "${CMAKE_SOURCE_DIR}/assets/icon.icns")
+    set_source_files_properties("${ICON_FILE}" PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
+    target_sources(idler PRIVATE "${ICON_FILE}")
+
     target_link_libraries(idler PRIVATE
         "-framework ApplicationServices"
         "-framework CoreFoundation"
@@ -68,7 +81,7 @@ if(APPLE)
         MACOSX_BUNDLE_GUI_IDENTIFIER "com.idler.autoclicker"
         MACOSX_BUNDLE_BUNDLE_VERSION ${PROJECT_VERSION}
         MACOSX_BUNDLE_SHORT_VERSION_STRING ${PROJECT_VERSION}
+        MACOSX_BUNDLE_ICON_FILE "icon.icns"
     )
-
 endif()
 # Qt framework bundling is handled by build_portable_mac.sh (macdeployqt + codesign).
