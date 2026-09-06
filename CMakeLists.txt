@@ -70,14 +70,5 @@ if(APPLE)
         MACOSX_BUNDLE_SHORT_VERSION_STRING ${PROJECT_VERSION}
     )
 
-    # macdeployqt bundles Qt frameworks into the .app so it runs without a Qt install.
-    # The build_portable_mac.sh script also calls this with -dmg to produce a .dmg.
-    find_program(MACDEPLOYQT macdeployqt HINTS ${Qt6_DIR}/../../../bin)
-    if(MACDEPLOYQT AND CMAKE_BUILD_TYPE STREQUAL "Release")
-        add_custom_command(TARGET idler POST_BUILD
-            COMMAND "${MACDEPLOYQT}" "$<TARGET_BUNDLE_DIR:idler>"
-            COMMENT "Running macdeployqt..."
-            VERBATIM
-        )
-    endif()
 endif()
+# Qt framework bundling is handled by build_portable_mac.sh (macdeployqt + codesign).

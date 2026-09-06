@@ -22,20 +22,30 @@ if ! command -v macdeployqt &>/dev/null; then
     fi
 fi
 
-echo "[1/3] Configuring..."
+QT_LIB_PATH="${CMAKE_PREFIX_PATH:-$(brew --prefix qt)}/lib"
+
+echo "[1/4] Configuring..."
 cmake -B "$BUILD_DIR" \
     -DCMAKE_BUILD_TYPE=Release \
     ${CMAKE_PREFIX_PATH:+-DCMAKE_PREFIX_PATH="$CMAKE_PREFIX_PATH"}
 
-echo "[2/3] Building..."
+echo "[2/4] Building..."
 cmake --build "$BUILD_DIR" --config Release
 
-echo "[3/3] Bundling Qt frameworks..."
+echo "[3/4] Bundling Qt frameworks..."
+# Clear extended attributes that break codesign
+xattr -cr "$APP_PATH"
+
 macdeployqt "$APP_PATH" \
+    -libpath="$QT_LIB_PATH" \
     -no-strip \
     -dmg
 
-# macdeployqt places the .dmg next to the .app
+echo "[4/4] Ad-hoc signing..."
+# Re-sign the whole bundle after macdeployqt (required for Gatekeeper on Apple Silicon)
+codesign --force --deep --sign - "$APP_PATH"
+
+# Move .dmg to a predictable location
 DMG_SRC="$BUILD_DIR/idler.dmg"
 DMG_DST="build/idler.dmg"
 if [[ -f "$DMG_SRC" ]]; then
