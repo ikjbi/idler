@@ -33,7 +33,8 @@ echo "[2/4] Building..."
 cmake --build "$BUILD_DIR" --config Release
 
 echo "[3/4] Bundling Qt frameworks..."
-# Clear extended attributes that break codesign
+# Ensure all files are writable before clearing xattrs / codesigning
+chmod -R u+w "$APP_PATH"
 xattr -cr "$APP_PATH"
 
 macdeployqt "$APP_PATH" \
